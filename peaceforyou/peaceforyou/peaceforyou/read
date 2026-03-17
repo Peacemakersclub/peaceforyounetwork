@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read – Peace For You Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="/peaceforyou/" class="text-2xl font-bold text-blue-600">🕊️ Peace For You Network</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="/peaceforyou/" class="text-gray-700 hover:text-blue-600">Home</a>
+                    <a href="/peaceforyou/write/" class="text-gray-700 hover:text-blue-600">Share</a>
+                    <a href="/peaceforyou/read/" class="text-blue-600 font-semibold">Read</a>
+                    <a href="/peaceforyou/connect/" class="text-gray-700 hover:text-blue-600">Connect</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold text-center mb-4">Listen to All Voices 🌍</h1>
+        <p class="text-center text-gray-600 mb-8">Every perspective matters. Every voice is welcome.</p>
+
+        <div class="flex justify-center gap-2 mb-8 flex-wrap">
+            <button onclick="filterContent('all')" class="filter-btn px-4 py-2 bg-blue-600 text-white rounded-full">All</button>
+            <button onclick="filterContent('story')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">📖 Stories</button>
+            <button onclick="filterContent('opinion')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">💭 Opinions</button>
+            <button onclick="filterContent('advice')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">💝 Advice</button>
+            <button onclick="filterContent('wish')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">✨ Wishes</button>
+            <button onclick="filterContent('letter')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">💌 Letters</button>
+            <button onclick="filterContent('poetry')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">📝 Poetry</button>
+            <button onclick="filterContent('future')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">⏳ Future</button>
+            <button onclick="filterContent('anything')" class="filter-btn px-4 py-2 bg-gray-200 rounded-full">🎨 Anything</button>
+        </div>
+
+        <div id="contentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <script>
+        function loadContent(type = 'all') {
+            const content = JSON.parse(localStorage.getItem('peace_content') || '[]');
+            const filtered = type === 'all' ? content : content.filter(c => c.type === type);
+            filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const grid = document.getElementById('contentGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="col-span-3 text-center text-gray-400 py-12">No content yet. Be the first to share!</p>';
+                return;
+            }
+            
+            grid.innerHTML = filtered.map(item => `
+                <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">${item.type}</span>
+                        <span class="text-xs text-gray-400">${new Date(item.timestamp).toLocaleDateString()}</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">${item.title || 'Untitled'}</h3>
+                    <p class="text-gray-600 mb-4">${(item.content || '').substring(0, 150)}...</p>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">${item.author?.name || 'Anonymous'} · ${item.author?.country || 'Global'}</span>
+                        <button onclick="react('${item.id}')" class="text-gray-400 hover:text-red-500">❤️ ${item.reactions?.heart || 0}</button>
+                    </div>
+                    ${item.futureYear ? `<div class="mt-2 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded inline-block">Opens ${item.futureYear}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function filterContent(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            event.target.classList.remove('bg-gray-200');
+            event.target.classList.add('bg-blue-600', 'text-white');
+            loadContent(type);
+        }
+
+        function react(id) {
+            const content = JSON.parse(localStorage.getItem('peace_content') || '[]');
+            const item = content.find(c => c.id === id);
+            if (item) {
+                item.reactions.heart = (item.reactions.heart || 0) + 1;
+                localStorage.setItem('peace_content', JSON.stringify(content));
+                loadContent();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => loadContent());
+    </script>
+</body>
+</html>
