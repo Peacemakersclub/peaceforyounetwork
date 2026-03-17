@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share – Peace For You Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="/peaceforyou/" class="text-2xl font-bold text-blue-600">🕊️ Peace For You Network</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="/peaceforyou/" class="text-gray-700 hover:text-blue-600">Home</a>
+                    <a href="/peaceforyou/write/" class="text-blue-600 font-semibold">Share</a>
+                    <a href="/peaceforyou/read/" class="text-gray-700 hover:text-blue-600">Read</a>
+                    <a href="/peaceforyou/connect/" class="text-gray-700 hover:text-blue-600">Connect</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-24 pb-12 px-4 max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">Share Your Heart 🕊️</h1>
+            <p class="text-xl text-gray-600">No limitations. Stories, opinions, advice, wishes, letters, poetry, anything.</p>
+        </div>
+
+        <!-- Type Selector -->
+        <div class="flex flex-wrap justify-center gap-2 mb-8">
+            <button onclick="setType('story')" class="type-btn px-4 py-2 bg-blue-600 text-white rounded-full">📖 Story</button>
+            <button onclick="setType('opinion')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">💭 Opinion</button>
+            <button onclick="setType('advice')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">💝 Advice</button>
+            <button onclick="setType('wish')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">✨ Wish</button>
+            <button onclick="setType('letter')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">💌 Letter</button>
+            <button onclick="setType('poetry')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">📝 Poetry</button>
+            <button onclick="setType('future')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">⏳ Future</button>
+            <button onclick="setType('anything')" class="type-btn px-4 py-2 bg-gray-200 rounded-full">🎨 Anything</button>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <form id="shareForm" onsubmit="return submitContent(event)">
+                <div class="mb-6 bg-blue-50 p-6 rounded-lg">
+                    <h3 class="font-semibold mb-4">About You (all optional)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="authorName" placeholder="Name" class="px-4 py-2 border rounded-lg">
+                        <input type="email" id="authorEmail" placeholder="Email" class="px-4 py-2 border rounded-lg">
+                        <select id="authorCountry" class="px-4 py-2 border rounded-lg">
+                            <option value="">Country</option>
+                            <option value="US">United States</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="IN">India</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="BR">Brazil</option>
+                            <option value="JP">Japan</option>
+                            <option value="KE">Kenya</option>
+                            <option value="ZA">South Africa</option>
+                            <option value="EG">Egypt</option>
+                            <option value="MX">Mexico</option>
+                            <option value="CA">Canada</option>
+                            <option value="AU">Australia</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <input type="text" id="title" placeholder="Title (optional)" class="w-full px-4 py-3 border rounded-lg mb-4">
+                    <textarea id="content" rows="10" placeholder="Write anything... Your story, opinion, advice, wishes, letter, poetry, whatever your heart wants to share." class="w-full px-4 py-3 border rounded-lg"></textarea>
+                    <div id="futureField" class="hidden mt-4">
+                        <label class="block text-gray-700 mb-2">Open this message in year:</label>
+                        <input type="number" id="futureYear" min="2024" max="2100" value="2050" class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA"></div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700">
+                    Share with the World 🕊️
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thank You Modal -->
+    <div id="thankYouModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl max-w-md p-8 text-center">
+            <div class="text-6xl mb-4">🕊️</div>
+            <h3 class="text-2xl font-bold mb-2">Thank You for Sharing</h3>
+            <p class="text-gray-600 mb-6">Your words matter. You're not alone.</p>
+            <button onclick="closeThankYou()" class="bg-blue-600 text-white px-6 py-2 rounded-lg">Write Another</button>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'story';
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type');
+        if (typeParam) setType(typeParam);
+
+        function setType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            event.target.classList.remove('bg-gray-200');
+            event.target.classList.add('bg-blue-600', 'text-white');
+            document.getElementById('futureField').classList.toggle('hidden', type !== 'future');
+        }
+
+        function submitContent(e) {
+            e.preventDefault();
+            
+            const content = {
+                id: Date.now().toString(),
+                type: currentType,
+                title: document.getElementById('title').value || 'Untitled',
+                content: document.getElementById('content').value,
+                futureYear: document.getElementById('futureYear')?.value,
+                author: {
+                    name: document.getElementById('authorName').value || 'Anonymous',
+                    email: document.getElementById('authorEmail').value,
+                    country: document.getElementById('authorCountry').value || 'Unknown'
+                },
+                timestamp: new Date().toISOString(),
+                reactions: { heart: 0 }
+            };
+
+            if (!content.content) {
+                alert('Please write something');
+                return;
+            }
+
+            const allContent = JSON.parse(localStorage.getItem('peace_content') || '[]');
+            allContent.push(content);
+            localStorage.setItem('peace_content', JSON.stringify(allContent));
+
+            if (content.author.email) {
+                const users = JSON.parse(localStorage.getItem('peace_users') || '{}');
+                if (!users[content.author.email]) {
+                    users[content.author.email] = { contributions: [], points: 0, badges: [] };
+                }
+                users[content.author.email].contributions.push(content.id);
+                users[content.author.email].points += 10;
+                if (users[content.author.email].contributions.length === 1) {
+                    users[content.author.email].badges.push('🌱 First Voice');
+                }
+                localStorage.setItem('peace_users', JSON.stringify(users));
+            }
+
+            document.getElementById('thankYouModal').classList.remove('hidden');
+            document.getElementById('thankYouModal').classList.add('flex');
+            document.getElementById('shareForm').reset();
+            return false;
+        }
+
+        function closeThankYou() {
+            document.getElementById('thankYouModal').classList.add('hidden');
+            document.getElementById('thankYouModal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
